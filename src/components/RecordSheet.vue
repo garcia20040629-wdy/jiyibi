@@ -91,7 +91,7 @@ function save() {
         @click="isAdvance = !isAdvance"
       >
         <span class="toggle-track"><span class="toggle-thumb"></span></span>
-        代付（帮朋友垫的钱，不算我的真实支出）
+        代付
       </button>
 
       <div class="field">

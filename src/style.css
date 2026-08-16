@@ -321,6 +321,26 @@ textarea:focus {
   color: var(--muted);
 }
 
+.chip.custom-chip {
+  border-style: dashed;
+}
+
+.custom-sub-input {
+  font-size: 14px;
+  padding: 8px 12px;
+}
+
+.settle-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settle-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
 /* 代付开关 */
 .advance-toggle {
   display: flex;

@@ -77,3 +77,28 @@ export function suggestAdvance(note) {
   if (!note) return false
   return ADVANCE_KEYWORDS.some((k) => note.includes(k))
 }
+
+// 用户自建的小类：按大类（收入用"收入"作组名）记忆在本地
+const CUSTOM_SUBS_KEY = 'jy_custom_subs'
+
+export function getCustomSubs(group) {
+  try {
+    const all = JSON.parse(localStorage.getItem(CUSTOM_SUBS_KEY) || '{}')
+    return Array.isArray(all[group]) ? all[group] : []
+  } catch {
+    return []
+  }
+}
+
+export function addCustomSub(group, sub) {
+  let all = {}
+  try {
+    all = JSON.parse(localStorage.getItem(CUSTOM_SUBS_KEY) || '{}')
+  } catch {
+    all = {}
+  }
+  const list = Array.isArray(all[group]) ? all[group] : []
+  if (!list.includes(sub)) list.push(sub)
+  all[group] = list
+  localStorage.setItem(CUSTOM_SUBS_KEY, JSON.stringify(all))
+}

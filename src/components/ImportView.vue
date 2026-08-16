@@ -2,8 +2,9 @@
 import { ref, computed } from 'vue'
 import { useImport } from '../composables/useImport'
 import { useRecords } from '../composables/useRecords'
-import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../lib/categories'
+import { INCOME_CATEGORIES, getCustomSubs } from '../lib/categories'
 import { fmtMoney } from '../lib/format'
+import CategoryPicker from './CategoryPicker.vue'
 
 const emit = defineEmits(['close', 'toast'])
 const { format, preview, importing, progress, report, parseFile, applySmartCategory, toggleAll, doImport, resetImport } =
@@ -55,10 +56,13 @@ function setType(p, t) {
   p.type = t
   if (t === 'ignore') {
     p.selected = false
-  } else {
-    p.selected = true
-    if (t === 'income') p.sub = p.sub === '其他' || !INCOME_CATEGORIES.includes(p.sub) ? '其他' : p.sub
+    return
   }
+  p.selected = true
+  if (t === 'income' && !INCOME_CATEGORIES.includes(p.sub) && !getCustomSubs('收入').includes(p.sub)) {
+    p.sub = '其他'
+  }
+  if (t === 'expense' && !p.main) p.main = '生存'
 }
 
 async function onImport() {
@@ -160,45 +164,24 @@ function done() {
               <button class="chip" :class="{ active: p.type === 'income' }" @click="setType(p, 'income')">收入</button>
               <button class="chip" :class="{ active: p.type === 'ignore' }" @click="setType(p, 'ignore')">忽略</button>
             </div>
-            <template v-if="p.type === 'expense'">
-              <div class="sub-chips">
-                <button
-                  v-for="c in EXPENSE_CATEGORIES"
-                  :key="c.key"
-                  class="chip"
-                  :class="{ active: p.main === c.key }"
-                  @click="p.main = c.key"
-                >
-                  {{ c.key }}
-                </button>
-              </div>
-              <div class="sub-chips">
-                <button
-                  v-for="s in EXPENSE_CATEGORIES.find((c) => c.key === p.main).subs"
-                  :key="s"
-                  class="chip"
-                  :class="{ active: p.sub === s }"
-                  @click="p.sub = s"
-                >
-                  {{ s }}
-                </button>
-              </div>
-              <button class="advance-toggle small" :class="{ on: p.isAdvance }" @click="p.isAdvance = !p.isAdvance">
-                <span class="toggle-track"><span class="toggle-thumb"></span></span>
-                代付
-              </button>
-            </template>
-            <div v-else-if="p.type === 'income'" class="sub-chips">
-              <button
-                v-for="s in INCOME_CATEGORIES"
-                :key="s"
-                class="chip"
-                :class="{ active: p.sub === s }"
-                @click="p.sub = s"
-              >
-                {{ s }}
-              </button>
-            </div>
+            <CategoryPicker
+              v-if="p.type === 'expense'"
+              type="expense"
+              :main="p.main"
+              :sub="p.sub"
+              @update:main="p.main = $event"
+              @update:sub="p.sub = $event"
+            />
+            <CategoryPicker v-else-if="p.type === 'income'" type="income" main="" :sub="p.sub" @update:sub="p.sub = $event" />
+            <button
+              v-if="p.type === 'expense'"
+              class="advance-toggle small"
+              :class="{ on: p.isAdvance }"
+              @click="p.isAdvance = !p.isAdvance"
+            >
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+              代付
+            </button>
             <input v-if="p.type !== 'ignore'" v-model="p.note" class="imp-note-input" type="text" placeholder="备注" />
           </div>
         </div>

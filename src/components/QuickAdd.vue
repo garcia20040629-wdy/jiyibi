@@ -3,10 +3,10 @@ import { ref, onMounted } from 'vue'
 import CategoryPicker from './CategoryPicker.vue'
 import { useRecords } from '../composables/useRecords'
 import { localDateStr, datePlusNow, fmtMoney } from '../lib/format'
-import { EXPENSE_CATEGORIES } from '../lib/categories'
+import { EXPENSE_CATEGORIES, categoryLabel } from '../lib/categories'
 
 const emit = defineEmits(['toast'])
-const { add, monthStats } = useRecords()
+const { add, monthStats, advances } = useRecords()
 
 const TYPES = [
   { key: 'expense', label: '支出' },
@@ -21,6 +21,7 @@ const amount = ref('')
 const note = ref('')
 const dateStr = ref(localDateStr(new Date()))
 const isAdvance = ref(false)
+const settleTarget = ref(null)
 const showExtra = ref(false)
 const saving = ref(false)
 const amountEl = ref(null)
@@ -54,6 +55,17 @@ function switchType(t) {
     sub.value = '其他'
     isAdvance.value = false
   }
+  settleTarget.value = null
+}
+
+function pickAdvance(a) {
+  if (settleTarget.value?.id === a.id) {
+    settleTarget.value = null
+    amount.value = ''
+  } else {
+    settleTarget.value = a
+    amount.value = String(a.amount)
+  }
 }
 
 function pickMain(m) {
@@ -77,6 +89,7 @@ async function save() {
     main_category: type.value === 'expense' ? main.value : '',
     sub_category:
       type.value === 'expense' ? sub.value || '其他' : type.value === 'income' ? sub.value || '其他' : '其他',
+    advance_refund_id: type.value === 'advance_refund' ? settleTarget.value?.id || null : null,
   }
   saving.value = true
   try {
@@ -84,6 +97,7 @@ async function save() {
     localStorage.setItem('jy_last', JSON.stringify({ type: type.value, main: main.value, sub: sub.value }))
     amount.value = ''
     note.value = ''
+    settleTarget.value = null
     emit('toast', `已记下 ¥${fmtMoney(v)}`, true)
     amountEl.value?.focus()
   } catch (e) {
@@ -127,6 +141,21 @@ const pct = (n) => (monthStats.total > 0 ? Math.round((n / monthStats.total) * 1
 
     <CategoryPicker :type="type" :main="main" :sub="sub" @update:main="pickMain" @update:sub="sub = $event" />
 
+    <div v-if="type === 'advance_refund' && advances.length" class="settle-pick">
+      <div class="settle-label">销掉这笔垫付（可不选）</div>
+      <div class="sub-chips">
+        <button
+          v-for="a in advances"
+          :key="a.id"
+          class="chip"
+          :class="{ active: settleTarget?.id === a.id }"
+          @click="pickAdvance(a)"
+        >
+          {{ a.note || categoryLabel(a) }} · ¥{{ fmtMoney(a.amount) }}
+        </button>
+      </div>
+    </div>
+
     <button
       v-if="type === 'expense'"
       class="advance-toggle"
@@ -134,7 +163,7 @@ const pct = (n) => (monthStats.total > 0 ? Math.round((n / monthStats.total) * 1
       @click="isAdvance = !isAdvance"
     >
       <span class="toggle-track"><span class="toggle-thumb"></span></span>
-      代付（帮朋友垫的钱，不算我的真实支出）
+      代付
     </button>
 
     <div class="extra-row">
