@@ -84,15 +84,9 @@ function save() {
 
       <CategoryPicker :type="type" :main="main" :sub="sub" @update:main="main = $event" @update:sub="sub = $event" />
 
-      <button
-        v-if="type === 'expense'"
-        class="advance-toggle"
-        :class="{ on: isAdvance }"
-        @click="isAdvance = !isAdvance"
-      >
-        <span class="toggle-track"><span class="toggle-thumb"></span></span>
-        代付
-      </button>
+      <div v-if="type === 'expense'" class="sub-chips sheet-advance">
+        <button class="chip" :class="{ active: isAdvance }" @click="isAdvance = !isAdvance">代付</button>
+      </div>
 
       <div class="field">
         <label>备注</label>

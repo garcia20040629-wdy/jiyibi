@@ -11,7 +11,6 @@ const { add, monthStats, advances } = useRecords()
 const TYPES = [
   { key: 'expense', label: '支出' },
   { key: 'income', label: '收入' },
-  { key: 'advance_refund', label: '代付收回' },
 ]
 
 const type = ref('expense')
@@ -141,9 +140,14 @@ const pct = (n) => (monthStats.total > 0 ? Math.round((n / monthStats.total) * 1
 
     <CategoryPicker :type="type" :main="main" :sub="sub" @update:main="pickMain" @update:sub="sub = $event" />
 
-    <div v-if="type === 'advance_refund' && advances.length" class="settle-pick">
-      <div class="settle-label">销掉这笔垫付（可不选）</div>
-      <div class="sub-chips">
+    <button v-if="type === 'income'" class="refund-link" @click="switchType('advance_refund')">
+      朋友还的垫付钱？记成代付收回 ›
+    </button>
+
+    <div v-if="type === 'advance_refund'" class="settle-pick">
+      <button class="refund-link" @click="switchType('income')">‹ 返回普通收入</button>
+      <div v-if="advances.length" class="settle-label">销掉这笔垫付（可不选）</div>
+      <div v-if="advances.length" class="sub-chips">
         <button
           v-for="a in advances"
           :key="a.id"
@@ -156,21 +160,19 @@ const pct = (n) => (monthStats.total > 0 ? Math.round((n / monthStats.total) * 1
       </div>
     </div>
 
-    <button
-      v-if="type === 'expense'"
-      class="advance-toggle"
-      :class="{ on: isAdvance }"
-      @click="isAdvance = !isAdvance"
-    >
-      <span class="toggle-track"><span class="toggle-thumb"></span></span>
-      代付
-    </button>
-
     <div class="extra-row">
       <button class="extra-btn" @click="showExtra = !showExtra">
         {{ showExtra ? '收起备注' : '备注（可选）' }}
       </button>
       <input v-if="showExtra" v-model="note" class="note-input" type="text" placeholder="记几个字，以后好回忆" />
+      <button
+        v-if="type === 'expense'"
+        class="chip"
+        :class="{ active: isAdvance }"
+        @click="isAdvance = !isAdvance"
+      >
+        代付
+      </button>
       <input v-model="dateStr" class="date-input" type="date" aria-label="日期" />
     </div>
 

@@ -341,6 +341,22 @@ textarea:focus {
   color: var(--muted);
 }
 
+.refund-link {
+  align-self: flex-start;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 2px 2px;
+  text-align: left;
+}
+
+.refund-link:active {
+  color: var(--accent);
+}
+
+.sheet-advance {
+  margin-bottom: 12px;
+}
+
 /* 代付开关 */
 .advance-toggle {
   display: flex;
