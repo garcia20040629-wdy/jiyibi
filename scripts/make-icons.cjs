@@ -6,25 +6,34 @@ const fs = require('fs')
 const outDir = path.join(__dirname, '..', 'public', 'icons')
 fs.mkdirSync(outDir, { recursive: true })
 
+// 渐变绿底 + 硬币圆环 + 白色 ¥（描边构成）
 function svg(maskable = false) {
-  // 512 画布；maskable 图标内容缩到中心 62% 安全区
   const s = maskable ? 0.62 : 1
   const cx = 256
   const cy = 256
-  const w = 176 * s
-  const h = 216 * s
-  const x = cx - w / 2
-  const y = cy - h / 2
-  const lines = [cy - 42 * s, cy, cy + 42 * s]
-    .map(
-      (ly) =>
-        `<line x1="${cx - 52 * s}" y1="${ly}" x2="${cx + 52 * s}" y2="${ly}" stroke="#ffffff" stroke-width="${22 * s}" stroke-linecap="round"/>`
-    )
-    .join('')
+  const ringR = 150 * s
+  const ringW = 13 * s
+  const ySw = 34 * s
+  const top = cy - 100 * s
+  const mid = cy + 22 * s
+  const bot = cy + 108 * s
+  const dx = 70 * s
+  const barHalf = 56 * s
+  const bar1y = cy - 16 * s
+  const bar2y = cy + 62 * s
   return `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512">
-  <rect width="512" height="512" rx="${maskable ? 0 : 115}" fill="#16a34a"/>
-  <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${26 * s}" fill="none" stroke="#ffffff" stroke-width="${26 * s}"/>
-  ${lines}
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4ade80"/>
+      <stop offset="1" stop-color="#15803d"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="${maskable ? 0 : 115}" fill="url(#g)"/>
+  <circle cx="${cx}" cy="${cy}" r="${ringR}" fill="none" stroke="#ffffff" stroke-width="${ringW}" opacity="0.45"/>
+  <path d="M ${cx - dx} ${top} L ${cx} ${mid} L ${cx + dx} ${top}" fill="none" stroke="#ffffff" stroke-width="${ySw}" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="${cx}" y1="${mid}" x2="${cx}" y2="${bot}" stroke="#ffffff" stroke-width="${ySw}" stroke-linecap="round"/>
+  <line x1="${cx - barHalf}" y1="${bar1y}" x2="${cx + barHalf}" y2="${bar1y}" stroke="#ffffff" stroke-width="${ySw}" stroke-linecap="round"/>
+  <line x1="${cx - barHalf}" y1="${bar2y}" x2="${cx + barHalf}" y2="${bar2y}" stroke="#ffffff" stroke-width="${ySw}" stroke-linecap="round"/>
 </svg>`
 }
 
