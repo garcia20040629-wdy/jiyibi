@@ -5,7 +5,7 @@ import { useRecords } from '../composables/useRecords'
 import { localDateStr, datePlusNow, fmtMoney } from '../lib/format'
 import { EXPENSE_CATEGORIES, categoryLabel } from '../lib/categories'
 
-const emit = defineEmits(['toast'])
+const emit = defineEmits(['toast', 'review'])
 const { add, monthStats, advances } = useRecords()
 
 const TYPES = [
@@ -203,6 +203,7 @@ const pct = (n) => (monthStats.total > 0 ? Math.round((n / monthStats.total) * 1
         </div>
       </div>
       <p v-if="monthStats.total === 0" class="stat-empty">这个月还没记支出，从上面记第一笔吧</p>
+      <button v-else class="stat-review-link" @click="emit('review')">查看回顾明细 ›</button>
     </div>
   </div>
 </template>

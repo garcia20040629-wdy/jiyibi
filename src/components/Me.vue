@@ -3,13 +3,17 @@ defineProps({
   email: { type: String, default: '' },
   advanceCount: { type: Number, default: 0 },
 })
-defineEmits(['import', 'advances', 'signout'])
+defineEmits(['import', 'advances', 'review', 'signout'])
 </script>
 
 <template>
   <div class="me">
     <div class="me-email">{{ email }}</div>
     <div class="me-menu">
+      <button class="me-item" @click="$emit('review')">
+        <span>📊 回顾</span>
+        <span class="me-arrow">›</span>
+      </button>
       <button class="me-item" @click="$emit('import')">
         <span>📥 导入账单</span>
         <span class="me-arrow">›</span>

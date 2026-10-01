@@ -14,6 +14,7 @@ import AdvanceSheet from './components/AdvanceSheet.vue'
 import AccountSheet from './components/AccountSheet.vue'
 import Advances from './components/Advances.vue'
 import ImportView from './components/ImportView.vue'
+import ReviewView from './components/ReviewView.vue'
 
 const { load, update, remove, settle, advances, reset } = useRecords()
 const { add: addAccount, update: updateAccount, remove: removeAccount } = useAccounts()
@@ -28,6 +29,7 @@ const advanceSheet = ref(null)
 const accountSheet = ref(null) // null | 'new' | account 对象
 const importOpen = ref(false)
 const advancesOpen = ref(false)
+const reviewOpen = ref(false)
 const toast = ref('')
 const toastOk = ref(false)
 let toastTimer = null
@@ -144,7 +146,7 @@ onMounted(async () => {
 
     <TabBar :tabs="tabsWithCount" :active="tab" @change="tab = $event" />
 
-    <QuickAdd v-if="tab === 'quick'" @toast="showToast" />
+    <QuickAdd v-if="tab === 'quick'" @toast="showToast" @review="reviewOpen = true" />
     <Records v-else-if="tab === 'records'" @open="sheetRecord = $event" />
     <Assets
       v-else-if="tab === 'assets'"
@@ -158,6 +160,7 @@ onMounted(async () => {
       :advance-count="advances.length"
       @import="importOpen = true"
       @advances="advancesOpen = true"
+      @review="reviewOpen = true"
       @signout="signOut"
     />
 
@@ -189,6 +192,8 @@ onMounted(async () => {
     <Advances v-if="advancesOpen" @close="advancesOpen = false" @settle="advanceSheet = $event" />
 
     <ImportView v-if="importOpen" @close="importOpen = false" @toast="showToast" />
+
+    <ReviewView v-if="reviewOpen" @close="reviewOpen = false" />
 
     <div v-if="toast" class="toast" :class="{ ok: toastOk }">{{ toast }}</div>
   </div>

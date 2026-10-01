@@ -77,11 +77,14 @@ const advances = computed(() =>
   records.value.filter((r) => r.type === 'expense' && r.is_advance && !settledIds.value.has(r.id))
 )
 
-// 本月统计：真实支出（不含代付）、真实收入、垫付中、三大类金额
-const monthStats = computed(() => {
-  const key = monthKey(new Date())
+// 统计口径：真实支出（不含垫付）、真实收入、垫付中、三大类金额、小类金额
+function summarize(key) {
   const cats = {}
-  for (const c of EXPENSE_CATEGORIES) cats[c.key] = 0
+  const subs = {}
+  for (const c of EXPENSE_CATEGORIES) {
+    cats[c.key] = 0
+    subs[c.key] = {}
+  }
   let expense = 0
   let income = 0
   let advancePending = 0
@@ -93,14 +96,22 @@ const monthStats = computed(() => {
         if (!settledIds.value.has(r.id)) advancePending += amt
       } else {
         expense += amt
-        if (cats[r.main_category] !== undefined) cats[r.main_category] += amt
+        if (cats[r.main_category] !== undefined) {
+          cats[r.main_category] += amt
+          const sub = r.sub_category || '其他'
+          subs[r.main_category][sub] = (subs[r.main_category][sub] || 0) + amt
+        }
       }
     } else if (r.type === 'income') {
       income += amt
     }
   }
-  return { expense, income, advancePending, cats, total: expense }
-})
+  return { expense, income, advancePending, cats, subs, total: expense }
+}
+
+// 指定月份（Date）的统计，回顾页用；本月统计也走同一口径
+const monthSummary = (d) => summarize(monthKey(d))
+const monthStats = computed(() => summarize(monthKey(new Date())))
 
 function reset() {
   records.value = []
@@ -109,5 +120,5 @@ function reset() {
 }
 
 export function useRecords() {
-  return { records, loading, error, load, add, update, remove, settle, advances, monthStats, reset }
+  return { records, loading, error, load, add, update, remove, settle, advances, monthStats, monthSummary, reset }
 }
