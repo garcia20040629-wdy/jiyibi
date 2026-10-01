@@ -1,4 +1,5 @@
 import { parseCsv } from '../csv.js'
+import { parseXlsx } from '../xlsx.js'
 
 // 列名归一化：去空格、全角括号转半角、小写，方便模糊匹配
 export function normCol(name) {
@@ -39,6 +40,16 @@ function decode(buf, encoding) {
 export async function loadCsvFile(file) {
   if (file.size > 10 * 1024 * 1024) throw new Error('文件超过 10MB，太大了')
   const buf = await file.arrayBuffer()
+
+  const u8 = new Uint8Array(buf)
+  const isXlsx = /\.xlsx$/i.test(file.name || '') || (u8.length > 4 && u8[0] === 0x50 && u8[1] === 0x4b)
+  if (isXlsx) {
+    const rows = await parseXlsx(buf)
+    const headerIdx = findHeaderRow(rows)
+    const format = headerIdx >= 0 ? detectFormat(rows, headerIdx) : null
+    if (!format) throw new Error('认不出这个文件，请确认是微信支付或支付宝导出的账单文件')
+    return { format, headerIdx, rows }
+  }
 
   const utf8Text = decode(buf, 'utf-8')
   let rows = parseCsv(utf8Text)

@@ -100,16 +100,16 @@ function done() {
       <!-- 第一步：选文件 -->
       <div v-if="step === 'pick'" class="imp-pick">
         <p class="overlay-tip">
-          把微信支付 / 支付宝的账单导出成 CSV 文件，导入后过去的花销也能进账本。重复导入同一份账单不会记重。
+          把微信支付 / 支付宝的账单文件上传到这里，导入后过去的花销也能进账本。重复导入同一份账单不会记重。
         </p>
         <details class="export-guide">
           <summary>怎么导出账单？点开看步骤</summary>
-          <p><b>微信：</b>我 → 服务 → 钱包 → 账单 → 右上角「常见问题」→ 下载账单 → 用于个人对账 → 选时间段 → 填邮箱。去邮箱下载压缩包，解压出 CSV。</p>
-          <p><b>支付宝：</b>我的 → 账单 → 右上角「…」→ 开具交易流水证明 → 用于个人对账 → 选时间段 → 填邮箱。解压密码在支付宝里查看，解压出 CSV。</p>
+          <p><b>微信：</b>我 → 服务 → 钱包 → 账单 → 右上角「常见问题」→ 下载账单 → 用于个人对账 → 选时间段 → 填邮箱。去邮箱下载压缩包，解压出 Excel 文件（.xlsx）直接上传。</p>
+          <p><b>支付宝：</b>我的 → 账单 → 右上角「…」→ 开具交易流水证明 → 用于个人对账 → 选时间段 → 填邮箱。解压密码在支付宝里查看，解压出 CSV 文件上传。</p>
         </details>
-        <input ref="fileEl" type="file" accept=".csv" style="display: none" @change="onFile" />
+        <input ref="fileEl" type="file" accept=".csv,.xlsx" style="display: none" @change="onFile" />
         <button class="save-btn" :disabled="busy" @click="fileEl.click()">
-          {{ busy ? '解析中…' : '选择账单 CSV 文件' }}
+          {{ busy ? '解析中…' : '选择账单文件' }}
         </button>
         <div v-if="errMsg" class="auth-error imp-error">{{ errMsg }}</div>
       </div>
